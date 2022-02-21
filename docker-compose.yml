@@ -1,0 +1,47 @@
+version: '3'
+services:
+
+  ecom-postgres:
+    image: "postgres:9.6-alpine"
+    container_name: ecom-postgres
+    volumes:
+      - ecom-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB:ecom
+      - POSTGRES_USER:ecom
+      - POSTGRES_PASSWORD:ecom
+
+  ecom-app:
+    build: ./ecom-app
+    container_name: ecom-app
+    environment:
+      - DB_SERVER=ecom-postgres
+    ports:
+      - 8080:8080
+    links:
+      - ecom-postgres
+
+  ecom-ui:
+    image: "angular-alpine:0.0.1"
+          container_name: ecom-ui 
+          tty: true
+          stdin_open: true
+          networks:
+            app_net:
+            ipv4_address: 172.16.238.05
+          depends_on:
+            - ecom-app
+
+
+volumes:
+  ecom-data:
+  
+networks:
+        app_net:
+          driver: bridge
+        ipam:
+        driver: default
+        config:
+          - subnet: 172.16.238.0/24
